@@ -1,0 +1,21 @@
+{
+  "name": "spc-research",
+  "version": "1.0.0",
+  "description": "SPC Non-Queryable Authenticator: Test Suite & Scored Analysis",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:report": "vitest run --reporter=json --outputFile=results.json",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "^11.0.0",
+    "@simplewebauthn/types": "^11.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0",
+    "@types/node": "^22.0.0"
+  }
+}
