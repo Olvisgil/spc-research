@@ -27,6 +27,74 @@ The **VC-enhanced approach** replaces the authenticator-stored CTAP `thirdPartyP
 | P1 + P2 + BBK | 48/70 |
 | **VC-Enhanced + BBK** | **70/70** |
 
+## Architecture Diagram
+
+```mermaid
+flowchart TB
+    subgraph EXT["EXTERNAL ACTORS"]
+        user["User / Payer<br/><i>Browser + Authenticator</i>"]:::actor
+        merchant["Merchant<br/><i>3rd-Party Origin</i>"]:::external
+        regulator["Regulator / Auditor<br/><i>Compliance Verifier</i>"]:::external
+    end
+
+    subgraph SPC["SPC ENGINE (TypeScript)"]
+        engine["SPC Engine<br/><i>Silent Detection · 4 Strategies</i>"]:::core
+        detect["Detection Layer<br/><i>simple-query · simple-response<br/>creation-time-cache · vc-based</i>"]:::core
+        flow["SPC Flow Simulator<br/><i>1p / 3p · Transaction UX / Fallback</i>"]:::core
+        bbk["BBK Module<br/><i>Browser Bound Keys<br/>Device Binding</i>"]:::core
+    end
+
+    subgraph VC["VC LAYER (ISO/TC 307 Profile)"]
+        issuer["VC Issuer<br/><i>did:web:bank.example<br/>BBS+ Signing</i>"]:::vc
+        verifier["VC Verifier<br/><i>BBS+ Verification<br/>Selective Disclosure</i>"]:::vc
+        store["VC Store<br/><i>Browser Local Store</i>"]:::vc
+        types["VC Types<br/><i>SPCCredentialClaims<br/>4 SPC Extension Claims</i>"]:::vc
+    end
+
+    subgraph ISO["ISO 20022 MAPPING"]
+        mapping["Mapping Module<br/><i>SupplementaryData<br/>pacs.008</i>"]:::iso
+    end
+
+    subgraph AUTH["AUTHENTICATOR PROFILES (10)"]
+        queryable["Queryable<br/><i>GPM · Windows Hello<br/>Chrome · Roaming USB</i>"]:::auth
+        nonquery["Non-Queryable<br/><i>iCloud Keychain · CredMan<br/>3rd-Party · Roaming NFC/BT<br/>Hybrid</i>"]:::auth
+    end
+
+    subgraph TEST["TEST SUITE (62 tests)"]
+        baseline["Baseline Tests<br/><i>35 tests · 6 groups</i>"]:::test
+        vctests["VC-Enhanced Tests<br/><i>27 tests · 7 groups</i>"]:::test
+    end
+
+    user --> engine
+    merchant --> engine
+    engine --> detect
+    detect --> queryable
+    detect --> nonquery
+    engine --> flow
+    engine --> bbk
+    detect --> store
+    store --> verifier
+    issuer --> store
+    types --> issuer
+    flow --> mapping
+    verifier --> regulator
+    mapping --> regulator
+    baseline --> engine
+    vctests --> engine
+    vctests --> verifier
+    vctests --> mapping
+
+    classDef actor fill:#e8f1fb,stroke:#0066cc,stroke-width:2px,color:#111
+    classDef external fill:#e8f1fb,stroke:#0066cc,stroke-width:2px,color:#111
+    classDef core fill:#fff,stroke:#888,stroke-width:1px,color:#555
+    classDef vc fill:#f0f5e8,stroke:#4a7c1e,stroke-width:1.5px,color:#333
+    classDef iso fill:#fff5e6,stroke:#cc7a00,stroke-width:1.5px,color:#333
+    classDef auth fill:#f9e8f0,stroke:#cc3399,stroke-width:1px,color:#333
+    classDef test fill:#e8eef9,stroke:#3366cc,stroke-width:1px,color:#333
+```
+
+**Legend:** Blue = external actors · Gray = SPC core engine · Green = VC layer (BBS+ / ISO TC 307) · Orange = ISO 20022 mapping · Pink = authenticator profiles · Light blue = test suite
+
 ## Repository Structure
 
 ```
